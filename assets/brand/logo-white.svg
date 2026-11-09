@@ -1,0 +1,7 @@
+<svg fill="#ffffff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256"><title>KujangWA Logo</title>
+  
+  <rect width="256" height="256" rx="48" fill="#ffffff"/>
+  <path fill="#ffffff" fill-rule="evenodd" d="M 56 56 L 168 56 L 200 88 L 200 152 L 168 184 L 112 184 L 80 216 L 80 184 L 56 184 Z M 88 88 L 88 152 L 152 152 L 168 136 L 168 104 L 152 88 Z"/>
+  <path fill="#ffffff" d="M 104 104 L 152 104 L 152 136 L 128 136 L 112 152 L 112 136 L 104 136 Z"/>
+  <rect x="176" y="176" width="24" height="24" fill="#ffffff"/>
+</svg>

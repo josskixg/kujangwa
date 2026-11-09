@@ -1,0 +1,17 @@
+{
+    "name": "josskixg/kujangwa",
+    "description": "Self-Hosted WhatsApp Cloud API & Multi-Session Webhook Router, Anti-Ban Token-Bucket Rate Limiter, Spintax AST Compiler & Stateless HMAC-SHA256 OTP Engine for Laravel 11 / PHP 8.2+",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "scripts": {
+        "test": "php tests/Unit/KujangWaTest.php"
+    }
+}

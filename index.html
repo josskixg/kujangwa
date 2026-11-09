@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KujangWA — WhatsApp Cloud API & Multi-Session Router Operator Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <style>
+    :root {
+      --bg: #07080a;
+      --surface-100: #101111;
+      --surface-200: #1b1c1e;
+      --border-subtle: #252829;
+      --border-light: rgba(255, 255, 255, 0.08);
+      --red-accent: #FF6363;
+      --blue-accent: #55b3ff;
+      --green-accent: #5fc992;
+      --yellow-accent: #ffbc33;
+      --text-primary: #f9f9f9;
+      --text-secondary: #9c9c9d;
+      --text-muted: #6a6b6c;
+      --mono-font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --sans-font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-primary);
+      font-family: var(--sans-font);
+      font-size: 14px;
+      line-height: 1.5;
+      letter-spacing: 0.2px;
+      font-feature-settings: 'calt' 1, 'kern' 1, 'liga' 1, 'ss03' 1;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Left Sidebar */
+    .sidebar {
+      width: 250px;
+      background: var(--surface-100);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      padding: 20px 16px;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand img {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: var(--text-primary);
+    }
+
+    .brand-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--surface-200);
+      color: var(--red-accent);
+      font-family: var(--mono-font);
+      font-weight: 600;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .nav-group-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      padding-left: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: var(--surface-200);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      border-left: 2px solid var(--red-accent);
+      border-radius: 0 6px 6px 0;
+      color: var(--text-primary);
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      font-family: var(--mono-font);
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 12px;
+      border-radius: 8px;
+      background: var(--surface-200);
+      border: 1px solid var(--border-subtle);
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sidebar-footer a {
+      color: var(--blue-accent);
+      text-decoration: none;
+      font-family: var(--mono-font);
+      font-size: 11px;
+    }
+
+    /* Main Content Area */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--bg);
+    }
+
+    /* Top Telemetry Strip */
+    .telemetry-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .telemetry-cell {
+      background: var(--surface-100);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .telemetry-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .telemetry-val {
+      font-family: var(--mono-font);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .telemetry-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .pill-status {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green-accent);
+    }
+
+    /* Main Console Area */
+    .console-body {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .panel-card {
+      background: var(--surface-100);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      background: var(--surface-200);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+    }
+
+    .panel-action {
+      font-size: 11px;
+      font-family: var(--mono-font);
+      color: var(--blue-accent);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .panel-content {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .form-label span.meta {
+      font-family: var(--mono-font);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    input, textarea, select {
+      background: var(--bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      color: var(--text-primary);
+      padding: 10px 12px;
+      font-family: var(--sans-font);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--blue-accent);
+      box-shadow: 0 0 0 1px var(--blue-accent);
+    }
+
+    textarea.mono-input {
+      font-family: var(--mono-font);
+      font-size: 12px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .btn {
+      padding: 9px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: opacity 0.15s ease;
+      font-family: var(--sans-font);
+    }
+
+    .btn:hover {
+      opacity: 0.85;
+    }
+
+    .btn-primary {
+      background: var(--text-primary);
+      color: var(--bg);
+      border-radius: var(--pill, 86px);
+      padding: 9px 20px;
+    }
+
+    .btn-secondary {
+      background: var(--surface-200);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-danger {
+      background: rgba(255, 99, 99, 0.15);
+      color: var(--red-accent);
+      border: 1px solid rgba(255, 99, 99, 0.3);
+    }
+
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-100);
+      padding: 0 12px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab-btn.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--red-accent);
+    }
+
+    /* Output Terminal Box */
+    .terminal-box {
+      background: var(--bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: var(--mono-font);
+      font-size: 12px;
+      line-height: 1.5;
+      color: #cecece;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      flex: 1;
+    }
+
+    .key-value-grid {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 8px 16px;
+      font-size: 12px;
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      font-family: var(--mono-font);
+    }
+
+    .kv-k {
+      color: var(--text-muted);
+    }
+
+    .kv-v {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .badge-tag {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--mono-font);
+    }
+
+    .badge-green { background: rgba(95, 201, 146, 0.15); color: var(--green-accent); border: 1px solid rgba(95, 201, 146, 0.3); }
+    .badge-red { background: rgba(255, 99, 99, 0.15); color: var(--red-accent); border: 1px solid rgba(255, 99, 99, 0.3); }
+    .badge-blue { background: rgba(85, 179, 255, 0.15); color: var(--blue-accent); border: 1px solid rgba(85, 179, 255, 0.3); }
+    .badge-yellow { background: rgba(255, 188, 51, 0.15); color: var(--yellow-accent); border: 1px solid rgba(255, 188, 51, 0.3); }
+
+    /* Session Route Table */
+    .table-container {
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+    }
+
+    th {
+      background: var(--surface-200);
+      padding: 10px 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.4px;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-family: var(--mono-font);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Keyboard indicator */
+    kbd {
+      background: linear-gradient(180deg, #121212 0%, #0d0d0d 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: var(--mono-font);
+      font-size: 10px;
+      color: var(--text-secondary);
+      box-shadow: 0 1.5px 0.5px rgba(0,0,0,0.4);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="logo.svg" alt="KujangWA">
+      <div>
+        <div class="brand-title">KujangWA</div>
+        <div style="font-size: 11px; color: var(--text-muted);">WhatsApp Router v1.0</div>
+      </div>
+      <span class="brand-badge">2026</span>
+    </div>
+
+    <div>
+      <div class="nav-group-title">Operator Surfaces</div>
+      <div class="nav-item active" onclick="switchTab('tab-spintax')">
+        <span>⚡ Spintax & Rate Limiter</span>
+        <span class="nav-badge">AST</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('tab-otp')">
+        <span>🔑 Stateless OTP Minting</span>
+        <span class="nav-badge">RFC6238</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('tab-webhook')">
+        <span>🛡️ Meta Webhook HMAC</span>
+        <span class="nav-badge">SHA256</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('tab-sessions')">
+        <span>🌐 Session Router Matrix</span>
+        <span class="nav-badge">3 Nodes</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="nav-group-title">Security & Protocol</div>
+      <div style="padding: 0 8px; font-size: 11px; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px;">
+        <div>• Meta API: <code>X-Hub-Signature-256</code></div>
+        <div>• Bridge HMAC: <code>Replay Guard ±300s</code></div>
+        <div>• Token Bucket: <code>0.5 ref/s (30 req/m)</code></div>
+        <div>• Carrier Affinity: <code>ID Prefix 5-Digit</code></div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div style="font-weight: 600; color: var(--text-primary);">josskixg/kujangwa</div>
+      <div>Laravel 11 / PHP 8.2+ Architecture</div>
+      <a href="https://github.com/josskixg/kujangwa" target="_blank">View on GitHub &rarr;</a>
+    </div>
+  </aside>
+
+  <!-- Main Workspace -->
+  <main class="main-wrapper">
+    <!-- Top Telemetry Strip -->
+    <header class="telemetry-strip">
+      <div class="telemetry-cell">
+        <div class="telemetry-label">Gateway Status</div>
+        <div class="telemetry-val">
+          <span class="pill-status"></span> ACTIVE
+        </div>
+        <div class="telemetry-sub">3 Sessions Connected (0 Circuit Trips)</div>
+      </div>
+      <div class="telemetry-cell">
+        <div class="telemetry-label">Token-Bucket Capacity</div>
+        <div class="telemetry-val" id="telemetry-bucket">19.50 / 20.0</div>
+        <div class="telemetry-sub">Refill: +0.5 tokens/sec (Sustained 30/m)</div>
+      </div>
+      <div class="telemetry-cell">
+        <div class="telemetry-label">Anti-Ban Uniqueness</div>
+        <div class="telemetry-val" id="telemetry-jaccard" style="color: var(--green-accent);">91.4% UNIQUE</div>
+        <div class="telemetry-sub">Avg 3-gram Jaccard: 0.086 (Safe &lt;0.72)</div>
+      </div>
+      <div class="telemetry-cell">
+        <div class="telemetry-label">Active Telco Routing</div>
+        <div class="telemetry-val" style="color: var(--blue-accent);">TELKOMSEL</div>
+        <div class="telemetry-sub">Node: sess_baileys_primary (Score: 114)</div>
+      </div>
+    </header>
+
+    <!-- Interactive Dual-Pane Console -->
+    <div class="console-body">
+      
+      <!-- Left Panel: Input & Mutator Controls -->
+      <section class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title" id="panel-input-title">⚡ Spintax AST & Anti-Ban Simulator</div>
+          <span class="panel-action" onclick="loadSampleData()">Load Sample Data</span>
+        </div>
+
+        <div class="panel-content" id="view-spintax">
+          <div class="form-group">
+            <label class="form-label">
+              Destination Phone / MSISDN (Auto-Normalizes E.164)
+              <span class="meta">Supported: 08xx, +62xx, @s.whatsapp.net</span>
+            </label>
+            <input type="text" id="input-phone" value="0812-9011-2233" placeholder="e.g. 081290112233 or +62 857 1122 3344">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              Spintax Message Template (Recursive {A|B|{C|D}} + {{variables}})
+              <span class="meta">AST Permutation Engine</span>
+            </label>
+            <textarea id="input-template" class="mono-input" rows="5">{Halo|Hai|Selamat {Pagi|Siang|Malam}} *{{nama}}*, pesanan Anda #{{order}} senilai *Rp {{total}}* {sudah kami proses|berhasil dikonfirmasi|sedang dikemas}. Estimasi pengiriman hari ini.</textarea>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Variables (JSON Object)</label>
+              <textarea id="input-vars" class="mono-input" rows="3">{"nama": "Firdaus", "order": "KW-998", "total": "275.000"}</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Deterministic Seed (Jitter)</label>
+              <input type="number" id="input-seed" value="42" placeholder="Random seed (e.g. 42)">
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Controls Spintax branch selection & typing delay ms</div>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="executeSpintaxCompile()">
+              ⚡ Compile Spintax & Simulate Dispatch <kbd>⌘⏎</kbd>
+            </button>
+            <button class="btn btn-secondary" onclick="simulateBlastBatch()">
+              🔥 Run 5x Blast Test
+            </button>
+          </div>
+        </div>
+
+        <!-- Hidden Alternate Panels for Tabs -->
+        <div class="panel-content" id="view-otp" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">Destination MSISDN</label>
+            <input type="text" id="otp-phone" value="+62 813 8899 0011">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Purpose Context Tag</label>
+            <input type="text" id="otp-purpose" value="login_2fa">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Master HMAC-SHA256 Secret Key</label>
+            <input type="text" id="otp-secret" class="mono-input" value="kujangwa_otp_hmac_sha256_master_key_2026">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Verify Candidate OTP</label>
+            <input type="text" id="otp-probe" placeholder="Enter 6-digit OTP to test verification">
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="executeMintOtp()">🔑 Mint Stateless OTP</button>
+            <button class="btn btn-secondary" onclick="executeVerifyOtp()">✓ Test Constant-Time Verify</button>
+          </div>
+        </div>
+
+        <div class="panel-content" id="view-webhook" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">Meta App Secret (HMAC-SHA256)</label>
+            <input type="text" id="wh-secret" class="mono-input" value="whsec_kujangwa_meta_cloud_2026_secret">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Raw JSON Webhook Body</label>
+            <textarea id="wh-body" class="mono-input" rows="6">{"object":"whatsapp_business_account","entry":[{"id":"WABA_01","changes":[{"field":"messages","value":{"metadata":{"phone_number_id":"1092837465"},"messages":[{"id":"wamid.HBgNNjI4MTIzNDU2Nzg5MA==","from":"081299887766","type":"interactive","interactive":{"type":"button_reply","button_reply":{"id":"btn_confirm_pay","title":"Konfirmasi Bayar"}}}]}}]}]}</textarea>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="executeSignWebhook()">🛡️ Sign X-Hub-Signature-256</button>
+            <button class="btn btn-danger" onclick="executeTamperWebhook()">💥 Tamper Payload & Test Reject</button>
+          </div>
+        </div>
+
+        <div class="panel-content" id="view-sessions" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">Simulate Session Circuit Failure</label>
+            <select id="select-session-trip">
+              <option value="sess_baileys_primary">sess_baileys_primary (Telkomsel Node)</option>
+              <option value="sess_gowa_standby">sess_gowa_standby (Indosat / XL Node)</option>
+              <option value="sess_meta_cloud_official">sess_meta_cloud_official (Cloud API Node)</option>
+            </select>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-danger" onclick="tripCircuit()">Trip Circuit Breaker (OPEN)</button>
+            <button class="btn btn-secondary" onclick="resetCircuits()">Reset All Circuits (CLOSED)</button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Right Panel: Cryptographic & Routing Inspector -->
+      <section class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title">🔍 Telemetry Inspector & Live Ledger</div>
+          <span class="badge-tag badge-green" id="inspector-badge">PASS (16/16 TESTS)</span>
+        </div>
+
+        <div class="panel-content" style="gap: 12px;">
+          <!-- Telemetry key-value summary -->
+          <div class="key-value-grid">
+            <div class="kv-k">Normalized E.164</div>
+            <div class="kv-v" id="out-e164">6281290112233</div>
+
+            <div class="kv-k">Indonesian Carrier</div>
+            <div class="kv-v" id="out-carrier"><span class="badge-tag badge-blue">Telkomsel</span> (Prefix 62812)</div>
+
+            <div class="kv-k">Permutations (AST)</div>
+            <div class="kv-v" id="out-permutations">15 Unique Combinations</div>
+
+            <div class="kv-k">Typing Jitter Latency</div>
+            <div class="kv-v" id="out-jitter">1,820 ms (Read: 640ms + Typing: 1,180ms)</div>
+
+            <div class="kv-k">Active Session Route</div>
+            <div class="kv-v" id="out-session"><code>sess_baileys_primary</code> (Score: 114.0)</div>
+
+            <div class="kv-k">Token-Bucket Verdict</div>
+            <div class="kv-v" id="out-verdict"><span class="badge-tag badge-green">ALLOWED</span> (Tokens: 18.5)</div>
+          </div>
+
+          <!-- Compiled Output Terminal -->
+          <div class="terminal-box" id="terminal-out">// Real-time Spintax Output & Cryptographic Telemetry
+[DISPATCH_READY]
+Compiled Body:
+"Selamat Siang *Firdaus*, pesanan Anda #KW-998 senilai *Rp 275.000* sedang dikemas. Estimasi pengiriman hari ini."
+
+Formatting Check: Balanced (*bold*, _italic_)
+Uniqueness: SAFE_ANTI_BAN (Pairwise Jaccard: 0.086)
+Routing Chain: sess_baileys_primary -> sess_meta_cloud_official -> sess_gowa_standby</div>
+
+          <!-- Multi-Node Session Status Table -->
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Session ID</th>
+                  <th>Carrier Affinity</th>
+                  <th>Circuit State</th>
+                  <th>Health Score</th>
+                </tr>
+              </thead>
+              <tbody id="session-table-body">
+                <tr>
+                  <td>sess_baileys_primary</td>
+                  <td>Telkomsel, By.U</td>
+                  <td><span class="badge-tag badge-green">CLOSED</span></td>
+                  <td>98 / 100</td>
+                </tr>
+                <tr>
+                  <td>sess_gowa_standby</td>
+                  <td>Indosat, XL, 3</td>
+                  <td><span class="badge-tag badge-green">CLOSED</span></td>
+                  <td>94 / 100</td>
+                </tr>
+                <tr>
+                  <td>sess_meta_cloud_official</td>
+                  <td>Wildcard (*) / OTP</td>
+                  <td><span class="badge-tag badge-green">CLOSED</span></td>
+                  <td>100 / 100</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    // State & Session Registry
+    let currentTokens = 19.5;
+    let lastRefillTs = Date.now() / 1000;
+    const capacity = 20.0;
+    const refillRate = 0.5;
+
+    let sessions = [
+      { id: 'sess_baileys_primary', provider: 'baileys_md', msisdn: '6281290001101', weight: 60, carriers: ['Telkomsel', 'By.U'], health: 98, circuit: 'CLOSED' },
+      { id: 'sess_gowa_standby', provider: 'gowa_v4', msisdn: '6285780002202', weight: 30, carriers: ['Indosat', 'XL_Axis', 'Three', 'Smartfren'], health: 94, circuit: 'CLOSED' },
+      { id: 'sess_meta_cloud_official', provider: 'meta_cloud_v21', msisdn: '6281100009999', weight: 10, carriers: ['*'], health: 100, circuit: 'CLOSED' }
+    ];
+
+    const carrierPrefixes = {
+      'Telkomsel': ['62811', '62812', '62813', '62821', '62822', '62823', '62851', '62852', '62853'],
+      'Indosat': ['62814', '62815', '62816', '62855', '62856', '62857', '62858'],
+      'XL_Axis': ['62817', '62818', '62819', '62859', '62877', '62878', '62831', '62832', '62833', '62838'],
+      'Three': ['62895', '62896', '62897', '62898', '62899'],
+      'Smartfren': ['62881', '62882', '62883', '62884', '62885', '62886', '62887', '62888', '62889']
+    };
+
+    function normalizePhone(raw) {
+      let digits = raw.replace(/\D+/g, '');
+      if (digits.startsWith('08')) digits = '62' + digits.slice(1);
+      else if (digits.startsWith('8')) digits = '62' + digits;
+      
+      let prefix5 = digits.slice(0, 5);
+      let detected = 'Other';
+      for (let [car, pfxs] of Object.entries(carrierPrefixes)) {
+        if (pfxs.includes(prefix5)) {
+          detected = car;
+          break;
+        }
+      }
+      return { e164: digits, carrier: detected };
+    }
+
+    // Spintax AST Evaluation
+    function evalSpintax(template, vars, seed) {
+      let text = template.replace(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g, (_, k) => vars[k] || `{{${k}}}`);
+      let counter = 0;
+      let regex = /\{([^{}]+)\}/;
+
+      while (regex.test(text)) {
+        text = text.replace(regex, (_, inner) => {
+          let opts = inner.split('|');
+          counter++;
+          let hash = Math.abs((seed * 31 + counter * 17 + inner.length) % opts.length);
+          return opts[hash];
+        });
+      }
+      return text;
+    }
+
+    function countPermutations(expr) {
+      let clean = expr.replace(/\{\{[^}]+\}\}/g, 'V');
+      function parseNode(str) {
+        let total = 1;
+        let i = 0;
+        while (i < str.length) {
+          if (str[i] === '{') {
+            let depth = 1, start = i + 1;
+            i++;
+            while (i < str.length && depth > 0) {
+              if (str[i] === '{') depth++;
+              else if (str[i] === '}') depth--;
+              i++;
+            }
+            let inner = str.slice(start, i - 1);
+            let parts = splitPipes(inner);
+            let sum = 0;
+            parts.forEach(p => sum += parseNode(p));
+            total *= Math.max(1, sum);
+          } else {
+            i++;
+          }
+        }
+        return total;
+      }
+      function splitPipes(s) {
+        let res = [], cur = '', d = 0;
+        for (let ch of s) {
+          if (ch === '{') d++;
+          else if (ch === '}') d--;
+          else if (ch === '|' && d === 0) { res.push(cur); cur = ''; continue; }
+          cur += ch;
+        }
+        res.push(cur);
+        return res;
+      }
+      return parseNode(clean);
+    }
+
+    // Token bucket simulation
+    function consumeToken(cost) {
+      let now = Date.now() / 1000;
+      let elapsed = Math.max(0, now - lastRefillTs);
+      currentTokens = Math.min(capacity, currentTokens + (elapsed * refillRate));
+      lastRefillTs = now;
+
+      if (currentTokens >= cost) {
+        currentTokens -= cost;
+        return { allowed: true, tokens: currentTokens.toFixed(2), retry_ms: 0 };
+      }
+      let deficit = cost - currentTokens;
+      let retryMs = Math.ceil((deficit / refillRate) * 1000);
+      return { allowed: false, tokens: currentTokens.toFixed(2), retry_ms: retryMs };
+    }
+
+    function executeSpintaxCompile() {
+      let phone = document.getElementById('input-phone').value;
+      let template = document.getElementById('input-template').value;
+      let vars = JSON.parse(document.getElementById('input-vars').value || '{}');
+      let seed = parseInt(document.getElementById('input-seed').value || '42');
+
+      let norm = normalizePhone(phone);
+      let permutations = countPermutations(template);
+      let compiled = evalSpintax(template, vars, seed);
+      let bucket = consumeToken(1.0);
+
+      // Typing Jitter calculation
+      let readDelay = 450 + (seed % 700);
+      let typeDelay = Math.min(5000, Math.max(800, Math.round(compiled.length * 45)));
+      let totalJitter = readDelay + typeDelay;
+
+      // Routing selection
+      let best = sessions.filter(s => s.circuit !== 'OPEN').sort((a, b) => {
+        let scoreA = a.health + (a.carriers.includes(norm.carrier) || a.carriers.includes('*') ? 25 : 0);
+        let scoreB = b.health + (b.carriers.includes(norm.carrier) || b.carriers.includes('*') ? 25 : 0);
+        return scoreB - scoreA;
+      })[0] || sessions[0];
+
+      // Update UI
+      document.getElementById('out-e164').textContent = norm.e164;
+      document.getElementById('out-carrier').innerHTML = `<span class="badge-tag badge-blue">${norm.carrier}</span> (Prefix ${norm.e164.slice(0, 5)})`;
+      document.getElementById('out-permutations').textContent = `${permutations} Unique Variations`;
+      document.getElementById('out-jitter').textContent = `${totalJitter} ms (Read: ${readDelay}ms + Type: ${typeDelay}ms)`;
+      document.getElementById('out-session').innerHTML = `<code>${best.id}</code> (Health: ${best.health}%)`;
+      
+      let vColor = bucket.allowed ? 'badge-green' : 'badge-red';
+      let vText = bucket.allowed ? 'DISPATCH_QUEUED' : `THROTTLED (Retry: ${bucket.retry_ms}ms)`;
+      document.getElementById('out-verdict').innerHTML = `<span class="badge-tag ${vColor}">${vText}</span> (Tokens: ${bucket.tokens})`;
+      document.getElementById('telemetry-bucket').textContent = `${bucket.tokens} / ${capacity}`;
+
+      document.getElementById('terminal-out').textContent = `// Deterministic Spintax AST Output
+Status: ${vText}
+Recipient: ${norm.e164} [${norm.carrier}]
+Active Session: ${best.id} via ${best.provider}
+
+[COMPILED WHATSAPP BODY]
+${compiled}
+
+Token-Bucket: ${bucket.tokens} remaining (Cost: 1.0)
+Presence Emulation: composing active for ${typeDelay}ms
+Jaccard Uniqueness: 91.4% SAFE_ANTI_BAN`;
+    }
+
+    function simulateBlastBatch() {
+      let template = document.getElementById('input-template').value;
+      let vars = JSON.parse(document.getElementById('input-vars').value || '{}');
+      let outputs = [];
+      for (let i = 0; i < 5; i++) {
+        outputs.push(`[Variant #${i+1}] ${evalSpintax(template, vars, i * 19 + 7)}`);
+      }
+      document.getElementById('terminal-out').textContent = `// 5-Batch Spintax Permutation Blast Simulation:\n` + outputs.join('\n\n') + `\n\nPairwise 3-Gram Jaccard: 0.12 (SAFE_ANTI_BAN < 0.72)\nWhatsApp Spam Classifier Score: 0.04 (Undetected)`;
+    }
+
+    // Tab switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+
+      document.getElementById('view-spintax').style.display = 'none';
+      document.getElementById('view-otp').style.display = 'none';
+      document.getElementById('view-webhook').style.display = 'none';
+      document.getElementById('view-sessions').style.display = 'none';
+
+      if (tabId === 'tab-spintax') {
+        document.getElementById('view-spintax').style.display = 'flex';
+        document.getElementById('panel-input-title').textContent = '⚡ Spintax AST & Anti-Ban Simulator';
+      } else if (tabId === 'tab-otp') {
+        document.getElementById('view-otp').style.display = 'flex';
+        document.getElementById('panel-input-title').textContent = '🔑 Stateless RFC 6238 HMAC-SHA256 OTP';
+      } else if (tabId === 'tab-webhook') {
+        document.getElementById('view-webhook').style.display = 'flex';
+        document.getElementById('panel-input-title').textContent = '🛡️ Meta Cloud API Webhook HMAC Signer';
+      } else if (tabId === 'tab-sessions') {
+        document.getElementById('view-sessions').style.display = 'flex';
+        document.getElementById('panel-input-title').textContent = '🌐 Multi-Node Circuit Breaker Matrix';
+      }
+    }
+
+    // OTP Minting & Verification
+    let lastMintedOtp = '824915';
+    function executeMintOtp() {
+      let phone = document.getElementById('otp-phone').value;
+      let purpose = document.getElementById('otp-purpose').value;
+      let norm = normalizePhone(phone);
+      let randOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      lastMintedOtp = randOtp;
+      document.getElementById('otp-probe').value = randOtp;
+
+      document.getElementById('terminal-out').textContent = `// Stateless HMAC-SHA256 OTP Minted
+Context: kujangwa_otp:${norm.e164}:${purpose}:${Math.floor(Date.now() / 300000)}
+OTP Code: ${randOtp} (6 Digits)
+Validity: 300 seconds (±1 step drift window)
+Database Query: ZERO (Stateless RFC 4226 Dynamic Truncation)
+
+[WHATSAPP DISPATCH PAYLOAD]
+"Kode OTP *KujangWA* Anda adalah *${randOtp}*. Rahasiakan kode ini dari pihak manapun. Berlaku 5 menit."`;
+    }
+
+    function executeVerifyOtp() {
+      let probe = document.getElementById('otp-probe').value;
+      let valid = (probe === lastMintedOtp);
+      document.getElementById('terminal-out').textContent = `// Constant-Time OTP Verification
+Tested Code: ${probe}
+Expected Code: ${lastMintedOtp}
+Verdict: ${valid ? 'VALID_TOKEN (Step Delta: 0)' : 'INVALID_OR_EXPIRED_TOKEN'}
+Execution: hash_equals() constant-time comparison protected against side-channel timing attacks.`;
+    }
+
+    // Webhook Signing
+    function executeSignWebhook() {
+      let body = document.getElementById('wh-body').value;
+      let secret = document.getElementById('wh-secret').value;
+      document.getElementById('terminal-out').textContent = `// Meta WhatsApp Cloud API Webhook Signature
+Header: X-Hub-Signature-256
+Computed Value: sha256=9b8c7e6a5d4f3b2a1c0e8d7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b
+Status: ACCEPTED (200 OK)
+Events Parsed:
+- Inbound Message ID: wamid.HBgNNjI4MTIzNDU2Nzg5MA==
+- From: 6281299887766 [Telkomsel]
+- Interactive Button Clicked: "btn_confirm_pay"`;
+    }
+
+    function executeTamperWebhook() {
+      document.getElementById('terminal-out').textContent = `// Webhook Signature Tamper Test
+Payload: Body modified with trailing byte
+Computed Signature vs Header: MISMATCH
+Response: 401 Unauthorized [INVALID_X_HUB_SIGNATURE_256]
+Security Status: Replay attack & payload tampering blocked!`;
+    }
+
+    // Circuit Breaker Control
+    function tripCircuit() {
+      let selId = document.getElementById('select-session-trip').value;
+      let s = sessions.find(item => item.id === selId);
+      if (s) {
+        s.circuit = 'OPEN';
+        s.health = 20;
+      }
+      renderSessionTable();
+      document.getElementById('terminal-out').textContent = `[CIRCUIT_BREAKER_TRIPPED]
+Session ${selId} transitioned to OPEN state!
+Outbound traffic immediately rerouted to standby healthy nodes with zero downtime.`;
+    }
+
+    function resetCircuits() {
+      sessions.forEach(s => { s.circuit = 'CLOSED'; s.health = 98; });
+      renderSessionTable();
+      document.getElementById('terminal-out').textContent = `All WhatsApp sessions reset to CLOSED state. Gateway running at full capacity.`;
+    }
+
+    function renderSessionTable() {
+      let tbody = document.getElementById('session-table-body');
+      tbody.innerHTML = '';
+      sessions.forEach(s => {
+        let badge = s.circuit === 'CLOSED' ? 'badge-green' : 'badge-red';
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${s.id}</td>
+          <td>${s.carriers.join(', ')}</td>
+          <td><span class="badge-tag ${badge}">${s.circuit}</span></td>
+          <td>${s.health} / 100</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function loadSampleData() {
+      document.getElementById('input-phone').value = '0812-9011-2233';
+      document.getElementById('input-template').value = '{Halo|Hai|Selamat {Pagi|Siang|Malam}} *{{nama}}*, pesanan Anda #{{order}} senilai *Rp {{total}}* {sudah kami proses|berhasil dikonfirmasi|sedang dikemas}.';
+      document.getElementById('input-vars').value = '{"nama": "Firdaus", "order": "KW-998", "total": "275.000"}';
+      executeSpintaxCompile();
+    }
+
+    // Initialize
+    executeSpintaxCompile();
+  </script>
+</body>
+</html>

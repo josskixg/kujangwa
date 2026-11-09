@@ -1,5 +1,5 @@
 {
-  "name": "KujangWA Logo",
+  "name": "KujangWA",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -18,7 +18,7 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#07080a",
-  "background_color": "#07080a",
+  "theme_color": "#111111",
+  "background_color": "#111111",
   "display": "standalone"
 }
